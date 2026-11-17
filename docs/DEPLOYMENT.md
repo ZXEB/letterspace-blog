@@ -30,7 +30,7 @@ sudo apt-get install -y git ca-certificates curl
 
 本文使用有 Docker 权限的用户执行；使用 `sudo docker` 时后续命令保持同一种方式。不要为了方便把 Docker socket 开放给网络。
 
-## 3. 获取私有仓库
+## 3. 获取公开源码仓库
 
 ```sh
 sudo mkdir -p /opt/letterspace-selfhost
@@ -39,7 +39,7 @@ git clone https://github.com/ZXEB/letterspace-blog.git /opt/letterspace-selfhost
 cd /opt/letterspace-selfhost
 ```
 
-如果 GitHub 提示认证，用户名填你的 GitHub 用户名，密码位置使用有该仓库读取权限的 token，或事先配置 SSH deploy key 再用 SSH 地址克隆。GitHub 网页登录密码不能直接用于 HTTPS Git 认证。**不要把 token 写进 clone URL、脚本、README 或提交到仓库。**
+当前仓库公开，克隆不需要登录或 token。只有以后自己把仓库改为私有时，才需要配置对应 GitHub 认证。**不要把 token 写进 clone URL、脚本、README 或提交到仓库。**
 
 也可以在 GitHub 仓库页面选择 Code → Download ZIP，上传到服务器后解压。ZIP 方式没有 Git 历史，后续更新需重新下载并保留 `.env`。
 

@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 
 const origin = process.env.BLOG_ORIGIN || 'http://localhost:18080'
+const siteOrigin = process.env.BLOG_SITE_ORIGIN || origin
 const credentials = Object.fromEntries(fs.readFileSync(process.env.BLOG_CREDENTIALS_FILE || new URL('../.cache/owner-credentials.txt', import.meta.url), 'utf8').trim().split('\n').map(line => { const i = line.indexOf(':'); return [line.slice(0, i).trim(), line.slice(i + 1).trim()] }))
 let cookie = ''
 async function request(path, method = 'GET', body) {
@@ -19,9 +20,9 @@ async function request(path, method = 'GET', body) {
 const init = await request('init')
 if ((init.is_init || init.isInit) && process.argv.includes('--fresh-only')) throw Error('Already initialized: refusing fresh-only bootstrap. Existing accounts and content were not changed.')
 if (!init.is_init && !init.isInit) {
-  await request('init/configs/seo', 'PATCH', { title: '纸间', description: '把日子写成一封信，记录生活、技术与寻常日子。', keywords: ['生活', '技术', '个人博客'], icon: `${origin}/favicon.svg` })
-  await request('init/configs/url', 'PATCH', { webUrl: origin, serverUrl: origin, adminUrl: `${origin}/proxy/qaqdmin`, wsUrl: origin })
-  await request('init/owner', 'POST', { username: credentials.username, password: credentials.password, mail: credentials.email, name: '纸间', url: origin, avatar: `${origin}/favicon.svg`, introduce: '记录生活、技术，以及那些不急着抵达的日常。' })
+  await request('init/configs/seo', 'PATCH', { title: '纸间', description: '把日子写成一封信，记录生活、技术与寻常日子。', keywords: ['生活', '技术', '个人博客'], icon: `${siteOrigin}/favicon.svg` })
+  await request('init/configs/url', 'PATCH', { webUrl: siteOrigin, serverUrl: siteOrigin, adminUrl: `${siteOrigin}/proxy/qaqdmin`, wsUrl: siteOrigin })
+  await request('init/owner', 'POST', { username: credentials.username, password: credentials.password, mail: credentials.email, name: '纸间', url: siteOrigin, avatar: `${siteOrigin}/favicon.svg`, introduce: '记录生活、技术，以及那些不急着抵达的日常。' })
   console.log('Created independent owner and site configuration.')
 }
 await request('auth/sign-in/username', 'POST', { username: credentials.username, password: credentials.password })

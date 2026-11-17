@@ -1,0 +1,123 @@
+# One-command distribution: prebuilt frontend, no git clone/npm/build step.
+services:
+  web:
+    image: nginx:1.27-alpine
+    environment:
+      SITE_ORIGIN: ${SITE_ORIGIN:?Set SITE_ORIGIN}
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./deploy/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - "${WEB_BIND_ADDRESS:-0.0.0.0}:${WEB_PORT:-18080}:80"
+    depends_on:
+      mx-core: { condition: service_healthy }
+      sitemap: { condition: service_healthy }
+    restart: unless-stopped
+    mem_limit: 160m
+    networks: [private]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  sitemap:
+    image: innei/mx-server@sha256:b1c726bee1b55a6649df632ff7e37f5595d533193365e3aef48ff792d327a3ad
+    entrypoint: ["node", "/site/sitemap-server.mjs"]
+    environment:
+      SITE_ORIGIN: ${SITE_ORIGIN:?Set SITE_ORIGIN}
+      API_ORIGIN: http://mx-core:2333
+    volumes:
+      - ./scripts/sitemap-server.mjs:/site/sitemap-server.mjs:ro
+    expose: ["8080"]
+    restart: unless-stopped
+    mem_limit: 64m
+    networks: [private]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  mx-core:
+    image: innei/mx-server@sha256:b1c726bee1b55a6649df632ff7e37f5595d533193365e3aef48ff792d327a3ad
+    environment: &mx-env
+      TZ: Asia/Shanghai
+      NODE_ENV: production
+      REDIS_HOST: redis
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_USER: mx_blog
+      PG_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      PG_DATABASE: mx_blog
+      SNOWFLAKE_WORKER_ID: "2"
+      ALLOWED_ORIGINS: ${SITE_ORIGIN:?Set SITE_ORIGIN}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      MX_ENCRYPT_KEY: ${MX_ENCRYPT_KEY:?Set MX_ENCRYPT_KEY}
+      PORT: "2333"
+    volumes:
+      - mx-assets:/root/.mx-space
+    expose: ["2333"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+    mem_limit: 600m
+    networks: [private]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:2333/api/v3/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  migrate:
+    image: innei/mx-server@sha256:b1c726bee1b55a6649df632ff7e37f5595d533193365e3aef48ff792d327a3ad
+    command: ["node", "migrate.mjs"]
+    environment: *mx-env
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: "no"
+    mem_limit: 450m
+    networks: [private]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mx_blog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: mx_blog
+      TZ: Asia/Shanghai
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    expose: ["5432"]
+    restart: unless-stopped
+    mem_limit: 280m
+    networks: [private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mx_blog -d mx_blog"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "noeviction"]
+    volumes: ["redis-data:/data"]
+    expose: ["6379"]
+    restart: unless-stopped
+    mem_limit: 96m
+    networks: [private]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+networks:
+  private: { driver: bridge }
+volumes:
+  postgres-data:
+  redis-data:
+  mx-assets:

@@ -6,6 +6,7 @@
 
 ## 文档入口
 
+- **不想克隆仓库/手工构建：[一条命令部署](docs/ONE_COMMAND.md)**
 - **第一次自己部署：[详细部署教程](docs/DEPLOYMENT.md)**
 - **备份、恢复、更新、域名切换：[运维说明](docs/OPERATIONS.md)**
 - **环境变量、目录和部署方式区别：[配置说明](docs/CONFIGURATION.md)**
@@ -17,7 +18,17 @@
 
 文章、手记、页面和其他内容由自己的 Mix Space 管理，不使用原参考站的数据。支持 Markdown 和官方富文本编辑器的 Markdown 导出正文；常规 Lexical 节点有回退渲染。特殊图表、交互嵌入没有逐项实现。前端为 SPA，不是完整 SSR。
 
-## 新服务器快速部署
+## 一条命令部署（推荐）
+
+在 Ubuntu/Debian amd64 服务器的 root 终端执行：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/install.sh | bash
+```
+
+安装脚本来自 GitHub，预编译安装包来自 GitHub Releases，均通过 HTTPS 下载；不依赖演示服务器的 IP，不需要 GitHub 登录、token、git clone 或 npm。安装完成后会显示新站前台、后台和随机管理员密码。端口占用、重复执行和独立数据卷的说明见 [一键部署文档](docs/ONE_COMMAND.md)。
+
+## 手动源码部署
 
 先按详细教程安装 Docker Engine 与 Compose 插件，并克隆本仓库。以下命令针对**全新目录和全新独立数据卷**；不要在已经运行的博客目录重新生成配置。
 
@@ -40,7 +51,7 @@ docker run --rm --network host --user "$(id -u):$(id -g)" \
 
 然后访问 `http://你的IP:18080/proxy/qaqdmin#/setup`，在官方面板中创建**你自己的**管理员和密码。仓库没有预置管理员密码；已有服务器的账号、文章、数据库、上传文件和密钥不在仓库中。
 
-仓库为私有时，克隆需要你的 GitHub 账号权限。首次启动、私有仓库认证、同机并行部署、域名/HTTPS、检查命令和常见错误均见 [完整教程](docs/DEPLOYMENT.md)。
+仓库已公开，克隆和下载安装包均不需要 GitHub 账号或令牌。首次启动、同机并行部署、域名/HTTPS、检查命令和常见错误均见 [完整教程](docs/DEPLOYMENT.md)。
 
 ## 部署文件怎么选
 
