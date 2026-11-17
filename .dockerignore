@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.cache
+.env
+.env.*
+!.env.example
+backups
+verification
+.incoming*
+.frontend*
+.github
+*.sql
+*.sql.gz
+*.dump
+*.tar.gz

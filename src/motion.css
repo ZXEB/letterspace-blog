@@ -1,0 +1,107 @@
+:root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.2,.8,.2,1.15)}
+
+/* Navigation keeps one continuous highlight instead of replacing each tab. */
+.main-nav{position:relative}
+.main-nav>a{z-index:1;border:1px solid transparent;border-radius:4px;transition:color 220ms ease,transform 220ms var(--ease-out)}
+.main-nav>a.active{border-color:transparent;background:transparent;box-shadow:none}
+.nav-indicator{position:absolute;z-index:0;pointer-events:none;left:0;top:0;width:var(--nav-width,0px);height:var(--nav-height,0px);transform:translate3d(var(--nav-x,0px),var(--nav-y,0px),0);border:1px solid var(--hairline);border-radius:4px;background:var(--surface);box-shadow:0 1px 3px #00000007;opacity:0;transition:transform 460ms var(--ease-out),width 420ms var(--ease-out),height 420ms var(--ease-out),opacity 200ms ease,background-color 300ms ease,border-color 300ms ease}
+.main-nav[data-indicator=ready]>.nav-indicator{opacity:1}
+.site-header{animation:nav-arrive 700ms 60ms var(--ease-out) backwards;transition:background-color 350ms ease,border-color 350ms ease,box-shadow 350ms ease}
+.site-header:hover{box-shadow:0 5px 22px #00000005}
+.icon-button{transition:background-color 200ms ease,color 200ms ease,transform 280ms var(--ease-spring)}
+.icon-button:active{transform:scale(.9)}
+.icon-button:hover svg{transform:translateY(-1px)}
+.icon-button svg{transition:transform 260ms var(--ease-out)}
+.theme-icon{display:grid;place-items:center;animation:icon-arrive 420ms var(--ease-out)}
+.menu-glyph{position:relative;display:block;width:16px;height:14px}
+.menu-glyph i{position:absolute;left:0;width:16px;height:1px;border-radius:1px;background:currentColor;transition:transform 360ms var(--ease-out),opacity 180ms ease,top 360ms var(--ease-out)}
+.menu-glyph i:nth-child(1){top:2px}.menu-glyph i:nth-child(2){top:7px}.menu-glyph i:nth-child(3){top:12px}
+.menu-glyph.is-open i:nth-child(1){top:7px;transform:rotate(45deg)}.menu-glyph.is-open i:nth-child(2){opacity:0;transform:translateX(-5px)}.menu-glyph.is-open i:nth-child(3){top:7px;transform:rotate(-45deg)}
+
+/* A small sequence makes the hero read like a greeting, then a letter. */
+.owner-avatar{animation:avatar-arrive 1000ms 100ms var(--ease-out) backwards;transition:transform 600ms var(--ease-spring),box-shadow 600ms ease}
+.owner-avatar:hover{transform:rotate(-6deg) scale(1.06);box-shadow:0 8px 26px color-mix(in srgb,var(--rose) 18%,transparent)}
+.hero-line{display:block;animation:line-arrive 1050ms 200ms var(--ease-out) backwards}
+.hero-line-second{animation-delay:320ms}
+.intro-copy>p{animation:soft-arrive 1000ms 460ms var(--ease-out) backwards}
+.intro-note{animation:soft-arrive 1100ms 590ms var(--ease-out) backwards}
+.intro-stats{animation:soft-arrive 1000ms 720ms var(--ease-out) backwards}
+.intro-stats strong{font-variant-numeric:tabular-nums}
+.intro-down{padding:12px;bottom:6px;animation:soft-arrive 900ms 1000ms var(--ease-out) backwards}
+.intro-down svg{animation:down-breathe 3200ms 1600ms ease-in-out infinite}
+.intro-down:hover svg{animation-play-state:paused}
+.inner-page>.route-content{animation:page-arrive 480ms var(--ease-out) backwards}
+
+/* Hover movement stays within the existing typography and spacing. */
+.writing-row,.small-note,.friend-entry,.project-entry{position:relative;isolation:isolate}
+.row-copy,.small-note>div,.friend-entry>div,.project-entry h2{transition:transform 420ms var(--ease-out)}
+.writing-row::after,.friend-entry::after,.project-entry::after{position:absolute;z-index:-1;inset:4px -10px;content:"";border-radius:6px;background:var(--soft);opacity:0;transform:scale(.985);transition:opacity 300ms ease,transform 420ms var(--ease-out);pointer-events:none}
+.writing-row:focus-within::after,.friend-entry:focus-visible::after,.project-entry:focus-visible::after{opacity:.65;transform:none}
+.row-arrow{transition:color 250ms ease,transform 420ms var(--ease-spring)}
+.text-link svg,.quiet-link svg,.back-link svg,.rss-page-link svg{transition:transform 360ms var(--ease-out)}
+.text-link:hover svg,.quiet-link:hover svg{transform:translateX(3px)}
+.back-link:hover svg{transform:translateX(-3px)}
+.filter-button{border-radius:4px;transition:background-color 260ms ease,border-color 260ms ease,color 260ms ease,transform 260ms var(--ease-out)}
+.filter-button.active{background:color-mix(in srgb,var(--rose) 6%,transparent)}
+.filter-button:active{transform:scale(.96)}
+.search-form{transition:border-color 260ms ease,box-shadow 260ms ease}
+.search-form:focus-within{border-color:var(--rose);box-shadow:0 3px 0 -2px color-mix(in srgb,var(--rose) 20%,transparent)}
+.search-form>svg{transition:color 260ms ease,transform 350ms var(--ease-out)}
+.search-form:focus-within>svg{color:var(--rose);transform:rotate(-8deg)}
+
+.month-line{position:relative}
+.month-line::before{position:absolute;left:4.1667%;right:4.1667%;top:5px;height:1px;background:var(--hairline);content:"";transform-origin:left}
+.month::before{display:none}
+.month i{transition:transform 400ms var(--ease-spring),box-shadow 400ms ease,background-color 300ms ease}
+.writing-activity[data-revealed=true] .month-line::before{animation:line-draw 1350ms 80ms var(--ease-out) backwards}
+.writing-activity[data-revealed=true] .month i{animation:dot-arrive 650ms calc(130ms + var(--step,0)*40ms) var(--ease-spring) backwards}
+.month:focus-visible i{transform:scale(1.8);box-shadow:0 0 0 5px color-mix(in srgb,var(--rose) 9%,transparent)}
+.reading-progress{position:fixed;left:0;right:0;top:0;z-index:50;height:2px;background:var(--rose);transform:scaleX(0);transform-origin:left;pointer-events:none;transition:transform 100ms linear;opacity:.7}
+
+.loading-dots{display:flex;justify-content:center;gap:5px;margin:0 0 12px}
+.loading-dots i{width:3px;height:3px;border-radius:50%;background:var(--rose);animation:loading-breathe 1300ms ease-in-out infinite}
+.loading-dots i:nth-child(2){animation-delay:150ms}.loading-dots i:nth-child(3){animation-delay:300ms}
+.writing-skeleton{border-top:1px solid var(--hairline)}
+.skeleton-row{display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start;min-height:111px;padding:24px 0;border-bottom:1px solid var(--hairline);animation:skeleton-breathe 1800ms calc(var(--step)*90ms) ease-in-out infinite}
+.skeleton-row>span{width:13px;height:6px;margin-top:5px;background:var(--hairline);border-radius:3px}
+.skeleton-row i{display:block;width:48%;height:11px;background:var(--hairline);border-radius:4px}
+.skeleton-row i+i{width:30%;height:6px;margin-top:16px;opacity:.7}
+.home-columns .writing-skeleton{border:0}.home-columns .skeleton-row{min-height:77px;padding:16px 0;border:0;grid-template-columns:20px 1fr}
+
+/* View transitions are progressive enhancement; CSS colors remain a fallback. */
+body{transition:background-color 420ms ease,color 300ms ease}
+.theme-changing body,.theme-changing *{transition:none!important}
+.theme-changing::view-transition-old(root),.theme-changing::view-transition-new(root){animation:none;mix-blend-mode:normal}
+.theme-changing::view-transition-old(root){z-index:1}.theme-changing::view-transition-new(root){z-index:2}
+
+@media(hover:hover) and (pointer:fine){
+  .writing-row:hover::after,.friend-entry:hover::after,.project-entry:hover::after{opacity:.65;transform:none}
+  .writing-row:hover .row-copy,.small-note:hover>div,.friend-entry:hover>div,.project-entry:hover h2{transform:translateX(5px)}
+  .writing-row:hover .row-arrow{transform:translate(4px,-4px)}
+  .month:hover i{transform:scale(1.8);box-shadow:0 0 0 5px color-mix(in srgb,var(--rose) 9%,transparent)}
+}
+@media(max-width:760px){
+  .main-nav,.main-nav.is-open{display:grid;position:absolute;transform-origin:top center;transition:opacity 240ms ease,transform 360ms var(--ease-out),visibility 240ms ease}
+  .main-nav:not(.is-open){opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-9px) scale(.98)}
+  .main-nav.is-open{opacity:1;visibility:visible;transform:none}
+  .main-nav>a{transition:color 200ms ease,transform 360ms var(--ease-out),opacity 240ms ease}
+  .main-nav:not(.is-open)>a{opacity:0;transform:translateY(-5px)}
+  .main-nav.is-open>a{opacity:1;transform:none;transition-delay:40ms}
+  .writing-row::after,.friend-entry::after,.project-entry::after{inset:4px -5px}
+}
+@keyframes nav-arrive{from{opacity:0;translate:0 -9px;filter:blur(3px)}to{opacity:1;translate:0 0;filter:blur(0)}}
+@keyframes avatar-arrive{from{opacity:0;transform:translateY(15px) scale(.88);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes line-arrive{from{opacity:0;transform:translateY(24px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes soft-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes page-arrive{from{opacity:0;transform:translateY(10px);filter:blur(2px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes icon-arrive{from{opacity:0;transform:rotate(-45deg) scale(.65)}to{opacity:1;transform:none}}
+@keyframes down-breathe{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(4px);opacity:1}}
+@keyframes line-draw{from{transform:scaleX(0);opacity:.3}to{transform:scaleX(1);opacity:1}}
+@keyframes dot-arrive{from{opacity:0;scale:.35}to{opacity:1;scale:1}}
+@keyframes loading-breathe{0%,70%,100%{opacity:.25;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
+@keyframes skeleton-breathe{0%,100%{opacity:.45}50%{opacity:.85}}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  ::view-transition-old(root),::view-transition-new(root){animation:none!important}
+}

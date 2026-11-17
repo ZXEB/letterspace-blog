@@ -1,0 +1,49 @@
+name: Verify self-host deployment
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fresh-deployment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BLOG_ORIGIN: http://127.0.0.1:18080
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Verify configuration safety
+        run: node --test scripts/selfhost.test.mjs
+      - name: Create fresh isolated environment
+        run: |
+          node scripts/setup-selfhost.mjs --origin "$BLOG_ORIGIN" --project letterspace-ci
+          docker compose --env-file .env -f compose.selfhost.yml config --quiet
+          node --input-type=module -e "import fs from 'node:fs';import crypto from 'node:crypto';fs.mkdirSync('.cache',{recursive:true});fs.writeFileSync('.cache/owner-credentials.txt','username: ci-owner\nemail: ci@example.invalid\npassword: '+crypto.randomBytes(24).toString('hex')+'\n',{mode:0o600})"
+      - name: Build and start complete Docker stack
+        run: |
+          docker compose --env-file .env -f compose.selfhost.yml up -d --build
+          node scripts/wait-selfhost.mjs
+      - name: Initialize only the new CI database
+        run: |
+          node scripts/configure-fresh.mjs
+          node scripts/bootstrap.mjs --fresh-only
+          if node scripts/configure-fresh.mjs; then
+            echo 'Existing-site configuration guard did not reject reinitialization'
+            exit 1
+          fi
+      - name: Verify fresh deployment and login
+        run: node scripts/smoke-api.mjs
+      - name: Diagnostics on failure
+        if: failure()
+        run: docker compose --env-file .env -f compose.selfhost.yml logs --tail=100
+      - name: Stop disposable CI stack
+        if: always()
+        run: docker compose --env-file .env -f compose.selfhost.yml down

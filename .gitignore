@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.cache/
+.env
+.env.*
+!.env.example
+!.env.selfhost.example
+backups/
+verification/
+.incoming*/
+.frontend*/
+*.sql
+*.sql.gz
+*.dump
+*.tar.gz
+release.sha256
+owner-credentials.txt
