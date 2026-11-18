@@ -98,7 +98,7 @@ pnpm dev
 ## 检查与测试
 
 ```sh
-node --test scripts/selfhost.test.mjs
+node --test scripts/selfhost.test.mjs scripts/oneclick.test.mjs scripts/search.test.mjs
 ```
 
 该测试验证首次配置创建、随机密钥格式、非法参数拒绝和**已有 `.env` 绝不覆盖**。GitHub Actions 会另外构建镜像、启动隔离 Docker 栈，在临时空数据库中初始化演示内容，并检查 API、后台会话、Feed、sitemap 与地址配置；它不连接任何现有部署。

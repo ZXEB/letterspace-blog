@@ -21,7 +21,7 @@ jobs:
           node-version: 22
           package-manager-cache: false
       - name: Verify configuration safety
-        run: node --test scripts/selfhost.test.mjs scripts/oneclick.test.mjs
+        run: node --test scripts/selfhost.test.mjs scripts/oneclick.test.mjs scripts/search.test.mjs
       - name: Create fresh isolated environment
         run: |
           node scripts/setup-selfhost.mjs --origin "$BLOG_ORIGIN" --project letterspace-ci
