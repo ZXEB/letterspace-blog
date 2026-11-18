@@ -5,6 +5,7 @@ import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams, us
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronDown, Clock3, Github, Heart, Link2, MapPin, Menu, Moon, Rss, Search, Sun, X } from 'lucide-react'
 import { api, postUrl, noteUrl, getPage, getAll, getList } from './api'
 import { Content } from './Content'
+import { searchPublicContent } from './search'
 import { CountUp, ReadingProgress, useNavIndicator, useReveal } from './Motion'
 import './styles.css'
 import './motion.css'
@@ -195,10 +196,9 @@ function SearchPage() {
   React.useEffect(() => setInput(query), [query])
   const state = useResource(async () => {
     if (!query.trim()) return {items: [], pagination: null}
-    const result = await getPage('search', page, 10, { keyword: query.trim() })
-    return {...result, items: result.items.map(item => ({...item, kind: item.type === 'note' ? '手记' : item.type === 'page' ? '页面' : '文章', to: item.type === 'note' ? noteUrl(item) : item.type === 'page' ? '/' + encodeURIComponent(item.slug) : postUrl(item)}))}
+    return searchPublicContent(query, page, 10)
   }, query + '/' + page)
-  return <><SectionHeading eyebrow="FIND YOUR WORDS" title="搜索" description="在这个小小的空间里，找一段文字。"/><form className="search-form" onSubmit={e => { e.preventDefault(); setParams(input.trim() ? {q:input.trim()} : {}) }}><Search size={17}/><input value={input} onChange={e => setInput(e.target.value)} placeholder="搜索文章、手记和页面…" aria-label="搜索文章和手记"/><button type="submit">搜索</button></form>{query && <p className="search-caption">「{query}」的搜索结果 · {state.data?.pagination?.total ?? '…'} 条</p>}{state.loading ? <Loading/> : state.error ? <Loading error/> : query && !state.data?.items.length ? <div className="empty-state">没有找到相关内容。</div> : <div className="writing-list">{state.data?.items.map((item,i)=><article className="writing-row" key={item.kind + '-' + item.id}><span className="row-index">{String((page - 1) * 10 + i+1).padStart(2,'0')}</span><div className="row-copy"><Link to={item.to} className="row-title">{item.title||item.kind}</Link><div className="row-meta"><span>{item.kind}</span><i/><time>{date(item.created_at)}</time></div><p className="row-summary">{item.highlight?.snippet || item.summary || item.text?.slice(0,120)}</p></div><ArrowUpRight className="row-arrow" size={17}/></article>)}</div>}<Pagination pagination={state.data?.pagination}/></>
+  return <><SectionHeading eyebrow="FIND YOUR WORDS" title="搜索" description="在这个小小的空间里，找一段文字。"/><form className="search-form" onSubmit={e => { e.preventDefault(); setParams(input.trim() ? {q:input.trim()} : {}) }}><Search size={17}/><input value={input} onChange={e => setInput(e.target.value)} placeholder="搜索文章、手记和页面…" aria-label="搜索文章和手记"/><button type="submit">搜索</button></form>{query && <p className="search-caption">「{query}」的搜索结果 · {state.data?.pagination?.total ?? '…'} 条</p>}{state.loading ? <Loading/> : state.error ? <Loading error/> : query && !state.data?.items.length ? <div className="empty-state">没有找到相关内容。</div> : <div className="writing-list">{state.data?.items.map((item,i)=><article className="writing-row" key={item.kind + '-' + item.id}><span className="row-index">{String((page - 1) * 10 + i+1).padStart(2,'0')}</span><div className="row-copy"><Link to={item.to} className="row-title">{item.title||item.kind}</Link><div className="row-meta"><span>{item.kind}</span><i/><time>{date(item.created_at)}</time></div><p className="row-summary">{item.searchSnippet}</p></div><ArrowUpRight className="row-arrow" size={17}/></article>)}</div>}<Pagination pagination={state.data?.pagination}/></>
 }
 
 function FriendsPage() {

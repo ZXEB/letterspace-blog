@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 077
-RELEASE_URL=${LETTERSPACE_RELEASE_URL:-https://github.com/ZXEB/letterspace-blog/releases/download/oneclick-2026.11.18/letterspace-a2e18592900bece8.tar.gz}
-RELEASE_SHA256='a2e18592900bece8ad80ff9a141386e6be7fbe52387f7f031fcd2567ed8cb808'
+RELEASE_URL=${LETTERSPACE_RELEASE_URL:-https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/releases/letterspace-07287318ba2f09e8.tar.gz}
+RELEASE_SHA256='07287318ba2f09e87a0ea213c6140adbe5b7c2dbccd6a5e02c65a5822dae62c2'
 CORE_IMAGE='innei/mx-server@sha256:b1c726bee1b55a6649df632ff7e37f5595d533193365e3aef48ff792d327a3ad'
 INSTALL_DIR=/opt/letterspace-oneclick
 PROJECT=letterspace-oneclick
@@ -121,6 +121,7 @@ if [[ ! -f "$INSTALL_DIR/compose.quickstart.yml" ]]; then
   cp -a "$STAGE/package/." "$INSTALL_DIR/"
   find "$INSTALL_DIR/dist" "$INSTALL_DIR/deploy" "$INSTALL_DIR/scripts" -type d -exec chmod 755 {} +
   find "$INSTALL_DIR/dist" "$INSTALL_DIR/deploy" "$INSTALL_DIR/scripts" -type f -exec chmod 644 {} +
+  chmod 755 "$INSTALL_DIR/scripts/pg-restore-compat.sh"
 fi
 cd "$INSTALL_DIR"
 say '下载运行镜像'

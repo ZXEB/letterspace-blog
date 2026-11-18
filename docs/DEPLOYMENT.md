@@ -41,6 +41,8 @@ cd /opt/letterspace-selfhost
 
 当前仓库公开，克隆不需要登录或 token。只有以后自己把仓库改为私有时，才需要配置对应 GitHub 认证。**不要把 token 写进 clone URL、脚本、README 或提交到仓库。**
 
+确认备份恢复辅助脚本可执行：`chmod 755 scripts/pg-restore-compat.sh`。该脚本和配套运行时表结构与固定的 Mix Space v13.20.0 镜像配套，升级后端前需重新验证备份恢复。
+
 也可以在 GitHub 仓库页面选择 Code → Download ZIP，上传到服务器后解压。ZIP 方式没有 Git 历史，后续更新需重新下载并保留 `.env`。
 
 ## 4. 选择端口、项目名和访问地址

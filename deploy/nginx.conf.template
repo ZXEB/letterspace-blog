@@ -9,6 +9,8 @@ server {
   root /usr/share/nginx/html;
   index index.html;
   charset utf-8;
+  # Mix Space backup archives and media uploads can exceed nginx's 1 MiB default.
+  client_max_body_size 128m;
   gzip on;
   gzip_vary on;
   gzip_min_length 1024;

@@ -60,6 +60,8 @@ services:
       PORT: "2333"
     volumes:
       - mx-assets:/root/.mx-space
+      - ./scripts/pg-restore-compat.sh:/usr/local/bin/pg_restore:ro
+      - ./scripts/mixspace-runtime-schema.sql:/site/mixspace-runtime-schema.sql:ro
     expose: ["2333"]
     depends_on:
       migrate: { condition: service_completed_successfully }

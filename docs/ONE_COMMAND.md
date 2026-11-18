@@ -6,7 +6,7 @@
 curl -fsSL https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/install.sh | bash
 ```
 
-脚本从 GitHub Raw 下载，安装包从 GitHub Releases 下载。仓库公开，不需要账号、token 或 git clone；使用已经编译好的前端，不运行 npm/pnpm。已有 Docker 时不升级或重启 Docker；没有 Docker 且未检测到其他容器运行时时，使用 Docker 官方 APT 软件源安装。
+脚本和校验过的预编译安装包均从 GitHub 仓库下载。仓库公开，不需要账号、token 或 git clone；使用已经编译好的前端，不运行 npm/pnpm。已有 Docker 时不升级或重启 Docker；没有 Docker 且未检测到其他容器运行时时，使用 Docker 官方 APT 软件源安装。
 
 默认自动检测公网 IPv4，使用空闲端口 18080；如果端口被占用，尝试下一个空闲端口。默认目录 `/opt/letterspace-oneclick`，Compose 项目 `letterspace-oneclick`，与原有 `letterspace` 项目独立。
 
@@ -46,7 +46,7 @@ docker compose --env-file .env -f compose.quickstart.yml ps
 docker compose --env-file .env -f compose.quickstart.yml logs --tail=80 mx-core
 ```
 
-首次安装需要访问 GitHub Raw、GitHub Releases 和 Docker Hub，不需要访问 npm。服务器的云防火墙仍须允许最终显示的端口。GitHub 无法访问时应先解决服务器网络，不自动切换到不明镜像站。
+首次安装需要访问 GitHub Raw 和 Docker Hub，不需要访问 npm。服务器的云防火墙仍须允许最终显示的端口。GitHub 无法访问时应先解决服务器网络，不自动切换到不明镜像站。
 
 ## 下载和数据边界
 

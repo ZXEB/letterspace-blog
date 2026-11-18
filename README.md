@@ -14,7 +14,7 @@
 
 ## 功能
 
-首页、分类文章列表与正文、手记、时间线、后端搜索、友链、项目、About 与其他独立页面、明暗/系统主题、手机导航、RSS、动态 sitemap 和基础 SEO。
+首页、分类文章列表与正文、手记、时间线、公开内容搜索、友链、项目、About 与其他独立页面、明暗/系统主题、手机导航、RSS、动态 sitemap 和基础 SEO。
 
 文章、手记、页面和其他内容由自己的 Mix Space 管理，不使用原参考站的数据。支持 Markdown 和官方富文本编辑器的 Markdown 导出正文；常规 Lexical 节点有回退渲染。特殊图表、交互嵌入没有逐项实现。前端为 SPA，不是完整 SSR。
 
@@ -26,7 +26,7 @@
 curl -fsSL https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/install.sh | bash
 ```
 
-安装脚本来自 GitHub，预编译安装包来自 GitHub Releases，均通过 HTTPS 下载；不依赖演示服务器的 IP，不需要 GitHub 登录、token、git clone 或 npm。安装完成后会显示新站前台、后台和随机管理员密码。端口占用、重复执行和独立数据卷的说明见 [一键部署文档](docs/ONE_COMMAND.md)。
+安装脚本与预编译安装包来自 GitHub 仓库，均通过 HTTPS 下载；不依赖演示服务器的 IP，不需要 GitHub 登录、token、git clone 或 npm。安装完成后会显示新站前台、后台和随机管理员密码。端口占用、重复执行和独立数据卷的说明见 [一键部署文档](docs/ONE_COMMAND.md)。
 
 ## 手动源码部署
 

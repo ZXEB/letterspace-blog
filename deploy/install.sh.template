@@ -121,6 +121,7 @@ if [[ ! -f "$INSTALL_DIR/compose.quickstart.yml" ]]; then
   cp -a "$STAGE/package/." "$INSTALL_DIR/"
   find "$INSTALL_DIR/dist" "$INSTALL_DIR/deploy" "$INSTALL_DIR/scripts" -type d -exec chmod 755 {} +
   find "$INSTALL_DIR/dist" "$INSTALL_DIR/deploy" "$INSTALL_DIR/scripts" -type f -exec chmod 644 {} +
+  chmod 755 "$INSTALL_DIR/scripts/pg-restore-compat.sh"
 fi
 cd "$INSTALL_DIR"
 say '下载运行镜像'

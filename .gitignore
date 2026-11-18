@@ -10,8 +10,10 @@ verification/
 .incoming*/
 .frontend*/
 *.sql
+!scripts/mixspace-runtime-schema.sql
 *.sql.gz
 *.dump
 *.tar.gz
+!releases/letterspace-*.tar.gz
 release.sha256
 owner-credentials.txt
