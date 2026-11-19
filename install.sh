@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 umask 077
-RELEASE_URL=${LETTERSPACE_RELEASE_URL:-https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/releases/letterspace-611f016e19c7e14f.tar.gz}
-RELEASE_SHA256='611f016e19c7e14f0649e0ce5e71f815f4842652999bf38cc15b31c53756fe78'
+RELEASE_URL=${LETTERSPACE_RELEASE_URL:-https://raw.githubusercontent.com/ZXEB/letterspace-blog/main/releases/letterspace-37be310f05ddd82c.tar.gz}
+RELEASE_SHA256='37be310f05ddd82c81febd2c38fccf6f3f43797384f5d7f8f00756b2c856979c'
 CORE_IMAGE='innei/mx-server@sha256:b1c726bee1b55a6649df632ff7e37f5595d533193365e3aef48ff792d327a3ad'
 INSTALL_DIR=/opt/letterspace-oneclick
 PROJECT=letterspace-oneclick

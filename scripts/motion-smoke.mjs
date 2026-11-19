@@ -51,7 +51,7 @@ try{
   await page.screenshot({path:uiDir+'/motion-dark.png',fullPage:true,animations:'disabled'})
   await nav.getByRole('link',{name:'文稿',exact:true}).click()
   await page.locator('.archive-card').first().waitFor();await page.waitForTimeout(850)
-  await page.locator('.archive-card .archive-title').first().click();await page.locator('.prose').waitFor();await page.waitForTimeout(900)
+  await page.locator('.archive-list .archive-title').first().click();await page.locator('.prose').waitFor();await page.waitForTimeout(900)
   assert(await page.locator('.prose').innerText().then(t=>t.length>20),'Animated article navigation still loads real content')
   await page.setViewportSize({width:390,height:600})
   await page.evaluate(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));await page.waitForTimeout(200)

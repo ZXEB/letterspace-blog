@@ -98,8 +98,8 @@ export function ReadingProgress({route}) {
   React.useEffect(() => {
     let frame = 0
     const update = () => {
-      const article = document.querySelector('.article-detail')
-      const distance = article ? article.offsetTop + article.offsetHeight - innerHeight : 0
+      const article = document.querySelector('.reader-paper, .letter-paper:not(.featured-letter), .article-detail')
+      const distance = article ? article.getBoundingClientRect().bottom + scrollY - innerHeight : 0
       const progress = distance > 0 ? Math.max(0, Math.min(1, scrollY / distance)) : 0
       if (bar.current) bar.current.style.transform = `scaleX(${progress})`
       frame = 0
