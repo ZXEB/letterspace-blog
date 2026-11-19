@@ -41,6 +41,11 @@ export function renderMarkdown(text) {
   return body.innerHTML
 }
 
+export function plainContent(text) {
+  const fragment = DOMPurify.sanitize(marked.parse(text || ''), { ALLOWED_TAGS: [], ALLOWED_ATTR: [], RETURN_DOM_FRAGMENT: true })
+  return fragment.textContent.replace(/\s+/g, ' ').trim()
+}
+
 function LexicalNode({ node }) {
   if (!node || typeof node !== 'object') return null
   const children = node.children?.map((child, i) => <LexicalNode key={i} node={child}/>)

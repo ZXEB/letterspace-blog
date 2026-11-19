@@ -2,13 +2,17 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { flushSync } from 'react-dom'
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, CalendarDays, ChevronDown, Clock3, Github, Heart, Link2, MapPin, Menu, Moon, Rss, Search, Sun, X } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, FileText, Menu, Moon, Rss, Search, Sun } from 'lucide-react'
 import { api, postUrl, noteUrl, getPage, getAll, getList } from './api'
 import { Content } from './Content'
+import { NoteArchive, NotePaper, Timeline } from './JournalViews'
+import PostArchive from './PostArchive'
+import PostReader from './PostReader'
 import { searchPublicContent } from './search'
 import { CountUp, ReadingProgress, useNavIndicator, useReveal } from './Motion'
 import './styles.css'
 import './motion.css'
+import './interior.css'
 
 const date = (value) => value ? new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value)) : '刚刚'
 const days = Math.max(0, Math.floor((Date.now() - new Date('2026-01-01').getTime()) / 86400000))
@@ -69,26 +73,49 @@ function ThemeToggle() {
   return <button className="icon-button theme-toggle" title={`主题：${theme === 'system' ? '跟随系统' : theme === 'dark' ? '深色' : '浅色'}`} aria-label="切换主题" onClick={cycle}><span key={theme} className="theme-icon"><Icon size={16}/></span></button>
 }
 
-function Header({ owner }) {
+function Header({ owner, compact }) {
   const [open, setOpen] = React.useState(false)
   const navRef = React.useRef(null)
   const location = useLocation()
   const indicatorEvents = useNavIndicator(navRef, `${location.pathname}/${open}`)
   React.useEffect(() => setOpen(false), [location.pathname])
-  const nav = [['/', '首页'], ['/posts', '文章'], ['/notes', '手记'], ['/timeline', '时间线'], ['/friends', '友链'], ['/projects', '项目']]
-  return <header className="site-header"><div className="header-inner"><Link to="/" className="brand"><span className="brand-mark">{owner?.name?.slice(0, 1) || '纸'}</span><span>{owner?.name || '纸间'}</span></Link><nav ref={navRef} id="site-navigation" aria-label="主导航" className={open ? 'main-nav is-open' : 'main-nav'} {...indicatorEvents}><span className="nav-indicator" aria-hidden="true"/>{nav.map(([path, label]) => <NavLink key={path} to={path} end={path === '/'}>{label}</NavLink>)}<NavLink to="/search" className="nav-search" aria-label="搜索"><Search size={16}/><span>搜索</span></NavLink></nav><div className="header-actions"><ThemeToggle/><a className="icon-button" href="/feed" title="RSS 订阅" aria-label="RSS 订阅"><Rss size={15}/></a><button className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="site-navigation" aria-label={open ? '关闭菜单' : '打开菜单'}><span className={open ? 'menu-glyph is-open' : 'menu-glyph'} aria-hidden="true"><i/><i/><i/></span></button></div></div></header>
+  const nav = [['/', '首页'], ['/posts', '文稿'], ['/notes', '手记'], ['/timeline', '时光'], ['/friends', '友链'], ['/projects', '项目']]
+  return <header className={compact ? 'site-header interior-header' : 'site-header'}>
+    <div className="header-inner">
+      <Link to="/" className="brand" aria-label="返回首页"><img src={owner?.avatar || '/favicon.svg'} alt=""/><span>{owner?.name || '纸间'}</span></Link>
+      <nav ref={navRef} id="site-navigation" aria-label="主导航" className={open ? 'main-nav is-open' : 'main-nav'} {...indicatorEvents}>
+        <span className="nav-indicator" aria-hidden="true"/>
+        {nav.map(([path, label]) => <NavLink key={path} to={path} end={path === '/'}>{path === '/posts' && location.pathname.startsWith('/posts') && <FileText size={13} aria-hidden="true"/>}{label}</NavLink>)}
+        <NavLink to="/search" className="nav-search" aria-label="搜索"><Search size={16}/><span>搜索</span></NavLink>
+      </nav>
+      <div className="header-actions">
+        <ThemeToggle/>
+        <a className="icon-button" href="/feed" title="RSS 订阅" aria-label="RSS 订阅"><Rss size={15}/></a>
+        <button className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="site-navigation" aria-label={open ? '关闭菜单' : '打开菜单'}><Menu size={15} aria-hidden="true"/></button>
+      </div>
+    </div>
+  </header>
 }
 
 function Footer({ owner }) {
   return <footer className="site-footer"><div className="footer-main"><div><Link to="/" className="footer-brand">{owner?.name || '知行间'}</Link><p>{owner?.description || '把日子写成一封信。'}</p></div><nav aria-label="页脚导航"><Link to="/about">关于</Link><Link to="/about-site">关于本站</Link><Link to="/friends">友链</Link><a href="/feed">RSS 订阅</a><a href="/proxy/qaqdmin#/dashboard">博客管理 ↗</a></nav></div><div className="footer-bottom"><span>© {new Date().getFullYear()} {owner?.name || '知行间'}</span><span>Powered by <a href="https://github.com/mx-space/core">Mix Space</a> · made with a little quiet</span></div></footer>
 }
 
-function PageLayout({ children, owner }) {
+function PageLayout({ children, owner, variant }) {
   const location = useLocation()
   const content = React.useRef(null)
   const route = location.pathname + location.search
   useReveal(content, route)
-  return <><ReadingProgress route={route}/><Header owner={owner}/><main ref={content} className={`page-shell${location.pathname === '/' ? ' home-page' : ' inner-page'}`}><div key={route} className="route-content">{children}</div></main><Footer owner={owner}/></>
+  const shell = location.pathname === '/' ? 'home-page' : 'inner-page'
+  const keepLayout = variant === 'posts' || variant === 'timeline'
+  return <>
+    <ReadingProgress route={route}/>
+    <Header owner={owner} compact={Boolean(variant)}/>
+    <main ref={content} className={`page-shell ${shell}${variant ? ` ${variant}-page-shell` : ''}`}>
+      <div key={keepLayout ? location.pathname : route} className="route-content">{children}</div>
+    </main>
+    <Footer owner={owner}/>
+  </>
 }
 
 function useResource(loader, dependency = '') {
@@ -139,13 +166,7 @@ function Home({ owner }) {
 }
 
 function PostsPage() {
-  const [params, setParams] = useSearchParams()
-  const page = currentPage(params)
-  const active = params.get('category') || 'all'
-  const state = useResource(() => getPage('posts', page, 10, active === 'all' ? {} : { categoryIds: active }), page + '/' + active)
-  const categories = useResource(() => api('categories'))
-  const select = (id) => setParams(id === 'all' ? {} : { category: id })
-  return <><SectionHeading eyebrow="ESSAYS & JOURNAL" title="文章" description="一些认真写下来的想法，和走过的日常。"/><div className="filter-line"><button className={active === 'all' ? 'filter-button active' : 'filter-button'} onClick={() => select('all')}>全部文章</button>{categories.data?.map(c => <button key={c.id} className={active === c.id ? 'filter-button active' : 'filter-button'} onClick={() => select(c.id)}>{c.name} <span>{c.count}</span></button>)}</div><PostList posts={state.data?.items} loading={state.loading} error={state.error} all/><Pagination pagination={state.data?.pagination}/><a className="rss-page-link" href="/feed">订阅 RSS <Rss size={14}/></a></>
+  return <PostArchive/>
 }
 
 function PostDetail() {
@@ -159,14 +180,16 @@ function PostDetail() {
   const post = state.data
   useSeo(post?.title, post?.summary || post?.text, post ? postUrl(post) : undefined)
   if (state.loading || state.error || !post) return <><Link to="/posts" className="back-link"><ArrowLeft size={14}/> 返回文章列表</Link><Loading error={state.error || (!state.loading && !post)}/></>
-  return <article className="article-detail"><Link to="/posts" className="back-link"><ArrowLeft size={14}/> 全部文章</Link><header className="article-header"><span className="eyebrow">{post.category?.name || '随笔'} · {date(post.created_at)}</span><h1>{post.title}</h1>{post.summary && <p>{post.summary}</p>}<div className="article-stats"><span><BookOpen size={14}/> {post.read_count || 0} 次阅读</span><span><Heart size={14}/> {post.like_count || 0}</span></div></header><Content document={post}/><div className="article-end"><span>这封信就写到这里。</span><Link to="/posts" className="quiet-link">继续阅读 <ArrowRight size={14}/></Link></div></article>
+  return <PostReader key={post.id} post={post}/>
 }
 
 function NotesPage() {
   const [params] = useSearchParams()
   const page = currentPage(params)
   const state = useResource(() => getPage('notes', page, 10), page)
-  return <><SectionHeading eyebrow="SMALL LETTERS" title="手记" description="不必写成文章的那些念头，也值得留下。"/>{state.loading || state.error ? <Loading error={state.error}/> : !state.data?.items.length ? <div className="empty-state">这里还没有公开的手记。</div> : <div className="note-list">{state.data.items.map(note => <article className="note-entry" key={note.id}><div className="note-date"><span>{new Date(note.created_at).getDate()}</span><span>{new Intl.DateTimeFormat('zh-CN',{month:'long',year:'numeric'}).format(new Date(note.created_at))}</span></div><div className="note-body">{(note.mood || note.weather) && <div className="note-atmosphere">{note.mood && <span>{note.mood}</span>}{note.weather && <span>{note.weather}</span>}{note.location && <span><MapPin size={12}/>{note.location}</span>}</div>}<Link to={`/notes/${note.nid || note.id}`} className="row-title">{note.title || date(note.created_at)}</Link><p>{note.text?.slice(0, 280) || '留下一些日常片段。'}</p><time>{date(note.created_at)}</time></div></article>)}</div>}<Pagination pagination={state.data?.pagination}/></>
+  if (state.loading || state.error) return <Loading error={state.error}/>
+  if (!state.data?.items.length) return <div className="empty-state">这里还没有公开的手记。</div>
+  return <><NoteArchive notes={state.data.items} page={page}/><Pagination pagination={state.data.pagination}/></>
 }
 
 function NoteDetail() {
@@ -175,17 +198,28 @@ function NoteDetail() {
   const state = useResource(() => api(route), route)
   useSeo(state.data?.title, state.data?.text, state.data ? noteUrl(state.data) : undefined)
   if (state.loading || state.error || !state.data) return <><Link to="/notes" className="back-link"><ArrowLeft size={14}/> 返回手记</Link><Loading error={state.error || (!state.loading && !state.data)}/></>
-  const note = state.data
-  return <article className="article-detail"><Link to="/notes" className="back-link"><ArrowLeft size={14}/> 全部手记</Link><header className="article-header"><span className="eyebrow">A SMALL LETTER · {date(note.created_at)}</span><h1>{note.title || date(note.created_at)}</h1></header><Content document={note}/><div className="article-end"><span>谢谢你读到这里。</span><Link to="/notes" className="quiet-link">其他手记 <ArrowRight size={14}/></Link></div></article>
+  return <NotePaper note={state.data}/>
 }
 
 function TimelinePage() {
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
   const page = currentPage(params)
   const posts = useResource(() => getAll('posts'))
   const notes = useResource(() => getAll('notes'))
-  const entries = [...(posts.data || []).map(p => ({ ...p, kind: '文章', to: postUrl(p), body: p.summary || p.text })), ...(notes.data || []).map(n => ({ ...n, kind: '手记', to: `/notes/${n.nid || n.id}`, body: n.text }))].sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-  return <><SectionHeading eyebrow="A LIFE IN NOTES" title="时间线" description="写过的文章和手记，都在这里相遇。"/><div className="timeline-toolbar"><span>{entries.length} 条记录</span><span><CalendarDays size={14}/> 按时间排序</span></div>{posts.loading || notes.loading || posts.error || notes.error ? <Loading error={posts.error || notes.error}/> : <div className="timeline-list">{entries.slice((page - 1) * 20, page * 20).map(item => <article className="timeline-entry" key={`${item.kind}-${item.id}`}><time>{date(item.created_at)}</time><div className="timeline-dot"/><div><span className="eyebrow">{item.kind}</span><Link to={item.to} className="row-title">{item.title || '日常片段'}</Link><p>{item.body?.slice(0, 160)}</p></div></article>)}</div>}<Pagination pagination={{page, total_pages: Math.ceil(entries.length / 20), total: entries.length}}/></>
+  if (posts.loading || notes.loading || posts.error || notes.error) return <Loading error={posts.error || notes.error}/>
+  const entries = [
+    ...posts.data.map(post => ({ ...post, kind: '博文', to: postUrl(post), label: post.category?.name })),
+    ...notes.data.map(note => ({ ...note, kind: '手记', to: noteUrl(note), label: [note.mood, note.weather].filter(Boolean).join(' · ') })),
+  ].filter(item => item.is_published !== false && Number.isFinite(Date.parse(item.created_at)))
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+  const compact = params.get('view') === 'compact'
+  const setCompact = value => {
+    const next = new URLSearchParams(params)
+    if (value) next.set('view', 'compact')
+    else next.delete('view')
+    setParams(next, { preventScrollReset: true })
+  }
+  return <><Timeline entries={entries} page={page} compact={compact} setCompact={setCompact}/><Pagination pagination={{page, total_pages: Math.ceil(entries.length / 20), total: entries.length}}/></>
 }
 
 function SearchPage() {
@@ -198,12 +232,49 @@ function SearchPage() {
     if (!query.trim()) return {items: [], pagination: null}
     return searchPublicContent(query, page, 10)
   }, query + '/' + page)
-  return <><SectionHeading eyebrow="FIND YOUR WORDS" title="搜索" description="在这个小小的空间里，找一段文字。"/><form className="search-form" onSubmit={e => { e.preventDefault(); setParams(input.trim() ? {q:input.trim()} : {}) }}><Search size={17}/><input value={input} onChange={e => setInput(e.target.value)} placeholder="搜索文章、手记和页面…" aria-label="搜索文章和手记"/><button type="submit">搜索</button></form>{query && <p className="search-caption">「{query}」的搜索结果 · {state.data?.pagination?.total ?? '…'} 条</p>}{state.loading ? <Loading/> : state.error ? <Loading error/> : query && !state.data?.items.length ? <div className="empty-state">没有找到相关内容。</div> : <div className="writing-list">{state.data?.items.map((item,i)=><article className="writing-row" key={item.kind + '-' + item.id}><span className="row-index">{String((page - 1) * 10 + i+1).padStart(2,'0')}</span><div className="row-copy"><Link to={item.to} className="row-title">{item.title||item.kind}</Link><div className="row-meta"><span>{item.kind}</span><i/><time>{date(item.created_at)}</time></div><p className="row-summary">{item.searchSnippet}</p></div><ArrowUpRight className="row-arrow" size={17}/></article>)}</div>}<Pagination pagination={state.data?.pagination}/></>
+  return <>
+    <div className="search-bar">
+      <Link to="/posts" aria-label="返回文稿"><ArrowLeft size={16}/></Link>
+      <form className="search-form" role="search" onSubmit={event => { event.preventDefault(); setParams(input.trim() ? { q: input.trim() } : {}) }}>
+        <input type="search" value={input} onChange={event => setInput(event.target.value)} placeholder="搜索文章、手记和页面…" aria-label="搜索文章和手记"/>
+        <button type="submit" aria-label="搜索"><Search size={16}/></button>
+      </form>
+    </div>
+    {!query ? <p className="search-hint">输入关键词搜索</p> : <>
+      <p className="search-caption">「{query}」的搜索结果 · {state.data?.pagination?.total ?? '…'} 条</p>
+      {state.loading ? <Loading/> : state.error ? <Loading error/> : !state.data?.items.length ? <div className="empty-state">没有找到相关内容。</div> :
+        <div className="search-results">{state.data.items.map(item => <article key={`${item.kind}-${item.id}`}>
+          <Link to={item.to}>{item.title || item.kind}</Link>
+          <p>{item.searchSnippet}</p>
+          <div className="row-meta"><span>{item.kind}</span><i/><time dateTime={item.created_at || undefined}>{date(item.created_at)}</time></div>
+        </article>)}</div>}
+      <Pagination pagination={state.data?.pagination}/>
+    </>}
+  </>
+}
+
+function FriendCard({ friend, index }) {
+  const [imageError, setImageError] = React.useState(false)
+  return <a className="friend-card" href={friend.url} target="_blank" rel="noreferrer">
+    <span className="friend-avatar" style={{ '--avatar-hue': (index * 63 + 104) % 360 }} aria-hidden="true">
+      {friend.avatar && !imageError ? <img src={friend.avatar} alt="" loading="lazy" onError={() => setImageError(true)}/> : (Array.from(friend.name || '')[0] || '友').toUpperCase()}
+    </span>
+    <span><strong>{friend.name}</strong>{friend.description && <span className="friend-description">{friend.description}</span>}</span>
+  </a>
 }
 
 function FriendsPage() {
   const state = useResource(() => getAll('friends'))
-  return <><SectionHeading eyebrow="PEOPLE I ADMIRE" title="朋友们" description="喜欢的人和他们认真经营的小小空间。"/>{state.loading || state.error ? <Loading error={state.error}/> : !state.data?.length ? <div className="empty-state">还没有添加朋友。<a href="/proxy/qaqdmin#/friends">从管理后台添加友链 ↗</a></div> : <div className="friend-list">{state.data.filter(f => !f.hide).map(friend=><a className="friend-entry" href={friend.url} target="_blank" rel="noreferrer" key={friend.id}><img src={friend.avatar||'/favicon.svg'} alt="" loading="lazy"/><div><strong>{friend.name}</strong><p>{friend.description||'一位认真生活和写作的朋友。'}</p></div><ArrowUpRight size={16}/></a>)}</div>}</>
+  const friends = (state.data || []).filter(friend => !friend.hide)
+  const active = friends.filter(friend => !friend.state)
+  const offline = friends.filter(friend => friend.state)
+  return <>
+    <header className="friends-heading"><h1>朋友们</h1><p>海内存知己，天涯若比邻</p></header>
+    {state.loading || state.error ? <Loading error={state.error}/> : !friends.length ? <div className="empty-state">还没有添加朋友。</div> : <>
+      <div className="friend-cards">{active.map((friend, index) => <FriendCard key={friend.id} friend={friend} index={index}/>)}</div>
+      {offline.length > 0 && <details className="offline-friends"><summary>暂时无法访问的站点 <ChevronDown size={15}/></summary><div className="friend-cards">{offline.map((friend, index) => <FriendCard key={friend.id} friend={friend} index={index}/>)}</div></details>}
+    </>}
+  </>
 }
 
 function ProjectsPage() {
@@ -233,13 +304,32 @@ function NotFound() { return <><SectionHeading eyebrow="404" title="这封信还
 function App() {
   const owner = useOwner()
   const location = useLocation()
-  React.useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); document.title = ({ '/':'纸间 | 一座安静的个人博客', '/posts':'文章 | 纸间', '/notes':'手记 | 纸间', '/timeline':'时间线 | 纸间', '/friends':'朋友们 | 纸间', '/projects':'项目 | 纸间', '/search':'搜索 | 纸间', '/about':'关于 | 纸间' })[location.pathname] || '纸间 | 一座安静的个人博客' }, [location.pathname])
+  React.useEffect(() => {
+    if (!location.hash) window.scrollTo({ top: 0, behavior: 'instant' })
+    document.title = ({ '/':'纸间 | 一座安静的个人博客', '/posts':'文稿列表 | 纸间', '/notes':'手记 | 纸间', '/timeline':'时间线 | 纸间', '/friends':'朋友们 | 纸间', '/projects':'项目 | 纸间', '/search':'搜索 | 纸间', '/about':'关于 | 纸间' })[location.pathname] || '纸间 | 一座安静的个人博客'
+  }, [location.pathname])
   React.useEffect(() => {
     document.querySelector('link[rel="canonical"]').href = window.location.origin + location.pathname
     document.querySelector('meta[name="description"]').content = '把日子写成一封信，记录生活、技术与寻常日子。'
   }, [location.pathname])
-  const page = (Component, props) => <PageLayout owner={owner}><Component {...props}/></PageLayout>
-  return <Routes><Route path="/" element={page(Home,{owner})}/><Route path="/posts" element={page(PostsPage)}/><Route path="/posts/:category/:slug" element={page(PostDetail)}/><Route path="/posts/:slug" element={page(PostDetail)}/><Route path="/notes" element={page(NotesPage)}/><Route path="/notes/:id" element={page(NoteDetail)}/><Route path="/notes/:year/:month/:day/:slug" element={page(NoteDetail)}/><Route path="/timeline" element={page(TimelinePage)}/><Route path="/search" element={page(SearchPage)}/><Route path="/friends" element={page(FriendsPage)}/><Route path="/projects" element={page(ProjectsPage)}/><Route path="/about" element={page(AboutPage,{owner})}/><Route path="/about-site" element={page(AboutSitePage)}/><Route path="/:slug" element={page(CustomPage)}/><Route path="*" element={page(NotFound)}/></Routes>
+  const page = (view, variant) => <PageLayout owner={owner} variant={variant}>{view}</PageLayout>
+  return <Routes>
+    <Route path="/" element={page(<Home owner={owner}/>)}/>
+    <Route path="/posts" element={page(<PostsPage/>, 'posts')}/>
+    <Route path="/posts/:category/:slug" element={page(<PostDetail/>, 'reading')}/>
+    <Route path="/posts/:slug" element={page(<PostDetail/>, 'reading')}/>
+    <Route path="/notes" element={page(<NotesPage/>, 'notes')}/>
+    <Route path="/notes/:id" element={page(<NoteDetail/>, 'notes')}/>
+    <Route path="/notes/:year/:month/:day/:slug" element={page(<NoteDetail/>, 'notes')}/>
+    <Route path="/timeline" element={page(<TimelinePage/>, 'timeline')}/>
+    <Route path="/search" element={page(<SearchPage/>, 'search')}/>
+    <Route path="/friends" element={page(<FriendsPage/>, 'friends')}/>
+    <Route path="/projects" element={page(<ProjectsPage/>)}/>
+    <Route path="/about" element={page(<AboutPage owner={owner}/>)}/>
+    <Route path="/about-site" element={page(<AboutSitePage/>)}/>
+    <Route path="/:slug" element={page(<CustomPage/>)}/>
+    <Route path="*" element={page(<NotFound/>)}/>
+  </Routes>
 }
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><App/></BrowserRouter></React.StrictMode>)
